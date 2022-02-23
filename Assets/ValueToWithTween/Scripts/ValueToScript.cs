@@ -23,7 +23,6 @@ namespace ValueToTween
         public UnityEvent OnCompleteEvent;
 
         private int _currentNumber;
-        private Coroutine _updateDelayRoutine;
         private int _numberOfOperations;
         private int _finalValue;
 
@@ -40,53 +39,51 @@ namespace ValueToTween
 
         public void UpdateInstant()
         {
-            StopAllCoroutinesAndTweens();
-            SetNextTarget();
-            OnCompleteLoop();
+            TweenValueChangeHelper.ChangeValueInstant(new TweenHelperParam
+            {
+                From = _currentNumber,
+                To = _finalValue,
+                OnUpdate = UpdateUi,
+                OnComplete = OnCompleteLoop,
+                Ease = ease,
+                Delay = 0,
+                Duration = duration
+            });
         }
 
         private void Init(float delay)
         {
-            StopAllCoroutinesAndTweens();
             SetNextTarget();
-            _updateDelayRoutine = StartCoroutine(UpdateAfterDelay(delay));
+            UpdateNumbers(delay);
         }
 
         private void SetNextTarget()
         {
-            if (_currentNumber == _finalValue)
+            if (_numberOfOperations > 0)
             {
-                _finalValue = _currentNumber + increment;
+                _currentNumber = _finalValue;
             }
+            _finalValue += increment;
         }
 
-        private void StopAllCoroutinesAndTweens()
+        private void UpdateNumbers(float delay = 0)
         {
-            if (_updateDelayRoutine != null)
+            TweenValueChangeHelper.ChangeValue(new TweenHelperParam
             {
-                StopCoroutine(_updateDelayRoutine);
-            }
-            DOTween.KillAll();
+                From = _currentNumber,
+                To = _finalValue,
+                OnStart = OnStart,
+                OnUpdate = OnUpdate,
+                OnComplete = OnCompleteLoop,
+                Ease = ease,
+                Delay = delay,
+                Duration = duration
+            });
         }
 
-        private IEnumerator UpdateAfterDelay(float delay)
+        private void OnStart()
         {
-            yield return new WaitForSeconds(delay);
-            UpdateNumbers();
-        }
-
-        private void UpdateNumbers()
-        {
-            float balance = _currentNumber;
-            float to = _finalValue;
-            DOTween.To(() => balance, x => balance = x, to, duration)
-                .SetEase(ease)
-                .OnStart(()=> OnStartEvent.Invoke())
-                .OnUpdate(() =>
-                {
-                    UpdateUi((int)balance);
-                })
-                .OnComplete(OnCompleteLoop);
+            OnStartEvent.Invoke();
         }
 
         private void OnCompleteLoop()
@@ -96,6 +93,15 @@ namespace ValueToTween
             UpdateUi(_finalValue);
             OnCompleteEvent.Invoke();
             Init(delay);
+        }
+
+        private void OnUpdate(int number)
+        {
+            UpdateUi(number);
+            if (number == _finalValue)
+            {
+                OnCompleteEvent.Invoke();
+            }
         }
 
         private void UpdateUi(int number)

@@ -14,14 +14,19 @@ public class BounceScript : MonoBehaviour
 
     public void StartBounce()
     {
-        StopBounce();
+        ResetTween();
+        _seq.Append(scaleUp.DOScale(scaleValue, duration)).SetLoops(-1, LoopType.Yoyo).SetEase(ease);
+    }
+
+    private void ResetTween()
+    {
+        _seq.Kill();
+        scaleUp.transform.localScale = Vector3.one;
         _seq = DOTween.Sequence();
-        _seq.Append(scaleUp.DOScale(scaleValue, duration).SetEase(ease).SetLoops(100000, LoopType.Yoyo));
     }
 
     public void StopBounce()
     {
-        _seq.Kill(true);
-        scaleUp.transform.localScale = Vector3.one;
+        ResetTween();
     }
 }
