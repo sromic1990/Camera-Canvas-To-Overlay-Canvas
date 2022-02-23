@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using StaticLibrary;
 using UnityEngine;
 
 public class BounceScript : MonoBehaviour
@@ -10,23 +11,13 @@ public class BounceScript : MonoBehaviour
     [SerializeField] private float duration;
     [SerializeField] private Ease ease;
 
-    private Sequence _seq;
-
     public void StartBounce()
     {
-        ResetTween();
-        _seq.Append(scaleUp.DOScale(scaleValue, duration)).SetLoops(-1, LoopType.Yoyo).SetEase(ease);
-    }
-
-    private void ResetTween()
-    {
-        _seq.Kill();
-        scaleUp.transform.localScale = Vector3.one;
-        _seq = DOTween.Sequence();
+        BounceLibrary.StartBounce(scaleUp, scaleValue, duration, ease);
     }
 
     public void StopBounce()
     {
-        ResetTween();
+        BounceLibrary.StopBounce(scaleUp);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using DG.Tweening;
 
-namespace ValueToTween
+namespace StaticLibrary
 {
     public class TweenHelperParam
     {
